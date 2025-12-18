@@ -78,21 +78,45 @@ router.post("/", verifyToken, verifyAdminOrModerator, async (req, res) => {
 
 router.get("/all-scholarships", async (req, res) => {
   try {
-    const { search, degree } = req.query;
+    const { search, country, category, degree, sort } = req.query;
     const filter = {};
 
     if (search) {
       filter.$or = [
         { scholarshipName: { $regex: search, $options: "i" } },
         { universityName: { $regex: search, $options: "i" } },
+        { degree: { $regex: search, $options: "i" } },
       ];
     }
 
-    if (degree) {
+    if (country) {
+      filter.universityCountry = country;
+    }
+
+    if (category) {
+      filter.scholarshipCategory = category;
+    }
+
+    if (degree && !search) {
       filter.degree = degree;
     }
 
-    const scholarships = await scholarshipsCollection().find(filter).toArray();
+    let sortOption = {};
+    if (sort === "fees_asc") {
+      sortOption = { applicationFees: 1 };
+    } else if (sort === "fees_desc") {
+      sortOption = { applicationFees: -1 };
+    } else if (sort === "date_asc") {
+      sortOption = { scholarshipPostDate: 1 };
+    } else if (sort === "date_desc") {
+      sortOption = { scholarshipPostDate: -1 };
+    }
+
+    const scholarships = await scholarshipsCollection()
+      .find(filter)
+      .sort(sortOption)
+      .toArray();
+
     res.json({
       total: scholarships.length,
       scholarships,
