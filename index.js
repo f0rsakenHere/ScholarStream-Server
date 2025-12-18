@@ -7,6 +7,7 @@ const usersRoutes = require("./routes/users");
 const scholarshipsRoutes = require("./routes/scholarships");
 const applicationsRoutes = require("./routes/applications");
 const reviewsRoutes = require("./routes/reviews");
+const authRoutes = require("./routes/auth");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -41,6 +42,7 @@ app.use("/api/users", usersRoutes);
 app.use("/api/applications", applicationsRoutes);
 app.use("/api/scholarships", scholarshipsRoutes);
 app.use("/api/reviews", reviewsRoutes);
+app.use("/api/auth", authRoutes);
 
 const startServer = async () => {
   await connectDB();
