@@ -13,7 +13,7 @@ const verifyAdmin = async (req, res, next) => {
     return res.status(404).json({ error: "User not found" });
   }
 
-  if (user.role !== "Admin") {
+  if (user.role !== "admin") {
     return res.status(403).json({ error: "Forbidden: Admin access required" });
   }
 
@@ -31,7 +31,7 @@ const verifyModerator = async (req, res, next) => {
     return res.status(404).json({ error: "User not found" });
   }
 
-  if (user.role !== "Moderator") {
+  if (user.role !== "moderator") {
     return res
       .status(403)
       .json({ error: "Forbidden: Moderator access required" });
@@ -51,7 +51,7 @@ const verifyAdminOrModerator = async (req, res, next) => {
     return res.status(404).json({ error: "User not found" });
   }
 
-  if (user.role !== "Admin" && user.role !== "Moderator") {
+  if (user.role !== "admin" && user.role !== "moderator") {
     return res
       .status(403)
       .json({ error: "Forbidden: Admin or Moderator access required" });

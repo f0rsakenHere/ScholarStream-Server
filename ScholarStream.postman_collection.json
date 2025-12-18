@@ -1,0 +1,726 @@
+{
+  "info": {
+    "name": "ScholarStream API",
+    "description": "Complete API collection for ScholarStream backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Generate JWT Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('token', response.token);",
+                  "    console.log('Token saved:', response.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/jwt",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "jwt"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"photoURL\": \"https://example.com/photo.jpg\",\n  \"role\": \"student\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            }
+          }
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/:id",
+              "host": ["{{base_url}}"],
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "USER_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Updated\",\n  \"role\": \"moderator\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/:id",
+              "host": ["{{base_url}}"],
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "USER_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/:id",
+              "host": ["{{base_url}}"],
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "USER_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Scholarships",
+      "item": [
+        {
+          "name": "Create Scholarship (Admin/Moderator)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scholarshipName\": \"MIT Engineering Excellence\",\n  \"universityName\": \"Massachusetts Institute of Technology\",\n  \"universityImage\": \"https://example.com/mit.jpg\",\n  \"universityCountry\": \"USA\",\n  \"universityCity\": \"Cambridge\",\n  \"universityWorldRank\": 1,\n  \"subjectCategory\": \"Engineering\",\n  \"scholarshipCategory\": \"Merit-based\",\n  \"degree\": \"Bachelor\",\n  \"tuitionFees\": 53790,\n  \"applicationFees\": 75,\n  \"serviceCharge\": 25,\n  \"applicationDeadline\": \"2025-12-31\",\n  \"postedUserEmail\": \"admin@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/scholarships",
+              "host": ["{{base_url}}"],
+              "path": ["scholarships"]
+            }
+          }
+        },
+        {
+          "name": "Get All Scholarships (Search/Filter/Sort)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc",
+              "host": ["{{base_url}}"],
+              "path": ["scholarships", "all-scholarships"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "engineering"
+                },
+                {
+                  "key": "country",
+                  "value": "USA"
+                },
+                {
+                  "key": "category",
+                  "value": "Merit-based",
+                  "disabled": true
+                },
+                {
+                  "key": "degree",
+                  "value": "Bachelor",
+                  "disabled": true
+                },
+                {
+                  "key": "sort",
+                  "value": "fees_asc",
+                  "description": "fees_asc | fees_desc | date_asc | date_desc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Scholarships (Basic)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/scholarships",
+              "host": ["{{base_url}}"],
+              "path": ["scholarships"]
+            }
+          }
+        },
+        {
+          "name": "Get Scholarship by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/scholarships/:id",
+              "host": ["{{base_url}}"],
+              "path": ["scholarships", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "SCHOLARSHIP_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Scholarship",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"applicationFees\": 100,\n  \"applicationDeadline\": \"2026-01-31\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/scholarships/:id",
+              "host": ["{{base_url}}"],
+              "path": ["scholarships", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "SCHOLARSHIP_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Scholarship",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/scholarships/:id",
+              "host": ["{{base_url}}"],
+              "path": ["scholarships", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "SCHOLARSHIP_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Applications",
+      "item": [
+        {
+          "name": "Submit Application",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scholarshipId\": \"SCHOLARSHIP_ID_HERE\",\n  \"universityName\": \"MIT\",\n  \"scholarshipCategory\": \"Merit-based\",\n  \"degree\": \"Bachelor\",\n  \"applicationFees\": 75,\n  \"serviceCharge\": 25,\n  \"applicantName\": \"John Doe\",\n  \"applicantEmail\": \"john@example.com\",\n  \"transactionId\": \"txn_1234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/applications",
+              "host": ["{{base_url}}"],
+              "path": ["applications"]
+            }
+          }
+        },
+        {
+          "name": "Get All Applications (Moderator)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/applications",
+              "host": ["{{base_url}}"],
+              "path": ["applications"]
+            }
+          }
+        },
+        {
+          "name": "Get My Applications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/applications/user/:email",
+              "host": ["{{base_url}}"],
+              "path": ["applications", "user", ":email"],
+              "variable": [
+                {
+                  "key": "email",
+                  "value": "john@example.com"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter Applications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/applications/filter?status=pending&paymentStatus=paid",
+              "host": ["{{base_url}}"],
+              "path": ["applications", "filter"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                },
+                {
+                  "key": "paymentStatus",
+                  "value": "paid"
+                },
+                {
+                  "key": "scholarshipId",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Application by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/applications/:id",
+              "host": ["{{base_url}}"],
+              "path": ["applications", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "APPLICATION_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Application (Student)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"applicantName\": \"John Updated\",\n  \"universityName\": \"MIT Updated\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/applications/:id",
+              "host": ["{{base_url}}"],
+              "path": ["applications", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "APPLICATION_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Application Status (Moderator)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"applicationStatus\": \"processing\",\n  \"feedback\": \"Your application is under review\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/applications/:id/status",
+              "host": ["{{base_url}}"],
+              "path": ["applications", ":id", "status"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "APPLICATION_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Application (Student)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/applications/:id",
+              "host": ["{{base_url}}"],
+              "path": ["applications", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "APPLICATION_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scholarshipId\": \"SCHOLARSHIP_ID_HERE\",\n  \"universityName\": \"MIT\",\n  \"userName\": \"John Doe\",\n  \"userEmail\": \"john@example.com\",\n  \"userImage\": \"https://example.com/user.jpg\",\n  \"ratingPoint\": 5,\n  \"reviewComment\": \"Excellent scholarship program!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews",
+              "host": ["{{base_url}}"],
+              "path": ["reviews"]
+            }
+          }
+        },
+        {
+          "name": "Get All Reviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reviews",
+              "host": ["{{base_url}}"],
+              "path": ["reviews"]
+            }
+          }
+        },
+        {
+          "name": "Get Reviews by Scholarship",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reviews/scholarship/:scholarshipId",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "scholarship", ":scholarshipId"],
+              "variable": [
+                {
+                  "key": "scholarshipId",
+                  "value": "SCHOLARSHIP_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter Reviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reviews/filter?minRating=4&universityName=MIT",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "filter"],
+              "query": [
+                {
+                  "key": "minRating",
+                  "value": "4"
+                },
+                {
+                  "key": "universityName",
+                  "value": "MIT"
+                },
+                {
+                  "key": "scholarshipId",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Review by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reviews/:id",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "REVIEW_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Review",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ratingPoint\": 4,\n  \"reviewComment\": \"Updated review comment\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews/:id",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "REVIEW_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Review",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reviews/:id",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "REVIEW_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Create Payment Intent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 100.00\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/create-payment-intent",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "create-payment-intent"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get Admin Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/admin-stats",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "admin-stats"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["health"]
+        }
+      }
+    }
+  ]
+}

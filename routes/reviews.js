@@ -169,13 +169,13 @@ router.put("/:id", async (req, res) => {
       { returnDocument: "after" }
     );
 
-    if (!result.value) {
+    if (!result) {
       return res.status(404).json({ error: "Review not found" });
     }
 
     res.json({
       message: "Review updated successfully",
-      review: result.value,
+      review: result,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

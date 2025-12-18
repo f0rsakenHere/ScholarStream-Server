@@ -179,7 +179,7 @@ router.put("/:id", verifyToken, async (req, res) => {
       { returnDocument: "after" }
     );
 
-    if (!result.value) {
+    if (!result) {
       return res.status(403).json({
         error: "You can only edit your own pending applications.",
       });
@@ -187,7 +187,7 @@ router.put("/:id", verifyToken, async (req, res) => {
 
     res.json({
       message: "Application updated successfully",
-      application: result.value,
+      application: result,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -222,13 +222,13 @@ router.patch("/:id/status", verifyToken, verifyModerator, async (req, res) => {
       { returnDocument: "after" }
     );
 
-    if (!result.value) {
+    if (!result) {
       return res.status(404).json({ error: "Application not found" });
     }
 
     res.json({
       message: "Application status updated successfully",
-      application: result.value,
+      application: result,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -259,13 +259,13 @@ router.patch("/:id/payment", async (req, res) => {
       { returnDocument: "after" }
     );
 
-    if (!result.value) {
+    if (!result) {
       return res.status(404).json({ error: "Application not found" });
     }
 
     res.json({
       message: "Application payment status updated successfully",
-      application: result.value,
+      application: result,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

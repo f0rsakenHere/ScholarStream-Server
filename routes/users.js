@@ -94,13 +94,13 @@ router.put("/:id", async (req, res) => {
       { returnDocument: "after" }
     );
 
-    if (!result.value) {
+    if (!result) {
       return res.status(404).json({ error: "User not found" });
     }
 
     res.json({
       message: "User updated successfully",
-      user: result.value,
+      user: result,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
