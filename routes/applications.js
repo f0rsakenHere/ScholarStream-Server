@@ -1,57 +1,67 @@
 const express = require("express");
 const { ObjectId } = require("mongodb");
 const { getDB } = require("../config/db");
+const verifyToken = require("../middleware/verifyToken");
+const { verifyModerator } = require("../middleware/verifyRoles");
 
 const router = express.Router();
 
 const applicationsCollection = () => getDB().collection("applications");
 
-router.post("/", async (req, res) => {
+router.post("/", verifyToken, async (req, res) => {
   try {
     const {
       scholarshipId,
-      userId,
-      userName,
-      userEmail,
       universityName,
       scholarshipCategory,
       degree,
       applicationFees,
       serviceCharge,
-      paymentStatus,
-      feedback,
+      applicantName,
+      applicantEmail,
+      transactionId,
     } = req.body;
 
-    // Validate required fields
     if (
-      !userId ||
-      !userName ||
-      !userEmail ||
+      !scholarshipId ||
       !universityName ||
       !scholarshipCategory ||
       !degree ||
       !applicationFees ||
-      !serviceCharge
+      !serviceCharge ||
+      !applicantName ||
+      !applicantEmail ||
+      !transactionId
     ) {
       return res.status(400).json({
         error: "Missing required fields",
       });
     }
 
+    const existingApplication = await applicationsCollection().findOne({
+      scholarshipId,
+      applicantEmail,
+    });
+
+    if (existingApplication) {
+      return res.status(409).json({
+        error: "You have already applied for this scholarship",
+      });
+    }
+
     const newApplication = {
       scholarshipId,
-      userId,
-      userName,
-      userEmail,
       universityName,
       scholarshipCategory,
       degree,
       applicationFees,
       serviceCharge,
+      applicantName,
+      applicantEmail,
+      transactionId,
       applicationStatus: "pending",
-      paymentStatus: paymentStatus || "unpaid",
+      paymentStatus: "paid",
       applicationDate: new Date(),
-      feedback: feedback || null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -67,8 +77,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// GET - Get all applications
-router.get("/", async (req, res) => {
+router.get("/", verifyToken, verifyModerator, async (req, res) => {
   try {
     const applications = await applicationsCollection().find({}).toArray();
     res.json({
@@ -80,6 +89,7 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/filter", async (req, res) => {
   try {
     const { userId, scholarshipId, status, paymentStatus } = req.query;
     const filter = {};
@@ -99,15 +109,36 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET - Get a specific application by ID
-router.get("/:id", async (req, res) => {
+router.get("/user/:email", verifyToken, async (req, res) => {
   try {
+    const email = req.params.email;
+
+    if (req.decoded.email !== email) {
+      return res.status(403).json({ message: "Forbidden access" });
+    }
+
+    const query = { applicantEmail: email };
+    const result = await applicationsCollection().find(query).toArray();
+    res.json({
+      total: result.length,
+      applications: result,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid application ID format" });
-    }    });
+    }
+
+    const application = await applicationsCollection().findOne({
+      _id: new ObjectId(id),
+    });
+
     if (!application) {
       return res.status(404).json({ error: "Application not found" });
     }
@@ -118,19 +149,21 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// PUT - Update an application (for status updates, feedback, etc.)
 router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const updateFields = req.body;
 
-router.put("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updateFields = req.body;
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid application ID format" });
-    }    const result = await applicationsCollection().findOneAndUpdate(
+    }
+
+    const updateData = {
+      ...updateFields,
+      updatedAt: new Date(),
+    };
+
+    const result = await applicationsCollection().findOneAndUpdate(
       { _id: new ObjectId(id) },
       { $set: updateData },
       { returnDocument: "after" }
@@ -149,8 +182,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// PATCH - Update application status (for moderators)
-router.patch("/:id/status", async (req, res) => {
+router.patch("/:id/status", verifyToken, verifyModerator, async (req, res) => {
   try {
     const { id } = req.params;
     const { applicationStatus, feedback } = req.body;
@@ -158,20 +190,25 @@ router.patch("/:id/status", async (req, res) => {
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid application ID format" });
     }
-router.patch("/:id/status", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { applicationStatus, feedback } = req.body;
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid application ID format" });
-    }
+
     if (!applicationStatus) {
       return res.status(400).json({ error: "applicationStatus is required" });
     }
+
     const updateData = {
       applicationStatus,
       updatedAt: new Date(),
-    };    );
+    };
+
+    if (feedback) {
+      updateData.feedback = feedback;
+    }
+
+    const result = await applicationsCollection().findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      { $set: updateData },
+      { returnDocument: "after" }
+    );
 
     if (!result.value) {
       return res.status(404).json({ error: "Application not found" });
@@ -186,7 +223,6 @@ router.patch("/:id/status", async (req, res) => {
   }
 });
 
-// PATCH - Update payment status
 router.patch("/:id/payment", async (req, res) => {
   try {
     const { id } = req.params;
@@ -199,23 +235,31 @@ router.patch("/:id/payment", async (req, res) => {
     if (!paymentStatus) {
       return res.status(400).json({ error: "paymentStatus is required" });
     }
-router.patch("/:id/payment", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { paymentStatus } = req.body;
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid application ID format" });
+
+    const updateData = {
+      paymentStatus,
+      updatedAt: new Date(),
+    };
+
+    const result = await applicationsCollection().findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      { $set: updateData },
+      { returnDocument: "after" }
+    );
+
+    if (!result.value) {
+      return res.status(404).json({ error: "Application not found" });
     }
-    if (!paymentStatus) {
-      return res.status(400).json({ error: "paymentStatus is required" });
-    }      application: result.value,
+
+    res.json({
+      message: "Application payment status updated successfully",
+      application: result.value,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// DELETE - Delete an application
 router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -232,10 +276,13 @@ router.delete("/:id", async (req, res) => {
       return res.status(404).json({ error: "Application not found" });
     }
 
-router.delete("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid application ID format" });
-    }
+    res.json({
+      message: "Application deleted successfully",
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;

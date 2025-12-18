@@ -8,6 +8,7 @@ const scholarshipsRoutes = require("./routes/scholarships");
 const applicationsRoutes = require("./routes/applications");
 const reviewsRoutes = require("./routes/reviews");
 const authRoutes = require("./routes/auth");
+const paymentsRoutes = require("./routes/payments");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -43,6 +44,7 @@ app.use("/api/applications", applicationsRoutes);
 app.use("/api/scholarships", scholarshipsRoutes);
 app.use("/api/reviews", reviewsRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/payments", paymentsRoutes);
 
 const startServer = async () => {
   await connectDB();

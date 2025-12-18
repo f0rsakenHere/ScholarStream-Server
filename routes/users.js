@@ -41,12 +41,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-// GET - Get all users
-router.get("/", async (req, res) => {
-  try {
-    const users = await usersCollection().find({}).toArray();
-    res.json({
-      total: users.length,
 router.get("/", async (req, res) => {
   try {
     const users = await usersCollection().find({}).toArray();
@@ -64,24 +58,34 @@ router.get("/:id", async (req, res) => {
     const { id } = req.params;
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid user ID format" });
-    }    res.json(user);
+    }
+
+    const user = await usersCollection().findOne({
+      _id: new ObjectId(id),
+    });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// PUT - Update a user
-router.put("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, email, photoURL, role } = req.body;
 router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { name, email, photoURL, role } = req.body;
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid user ID format" });
-    }    if (role) updateData.role = role;
+    }
+
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    if (photoURL) updateData.photoURL = photoURL;
+    if (role) updateData.role = role;
     updateData.updatedAt = new Date();
 
     const result = await usersCollection().findOneAndUpdate(
@@ -103,21 +107,25 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// DELETE - Delete a user
 router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Validate MongoDB ObjectId
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid user ID format" });
     }
-router.delete("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid user ID format" });
-    }      deletedCount: result.deletedCount,
+
+    const result = await usersCollection().deleteOne({
+      _id: new ObjectId(id),
+    });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({
+      message: "User deleted successfully",
+      deletedCount: result.deletedCount,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

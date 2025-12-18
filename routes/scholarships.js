@@ -1,12 +1,14 @@
 const express = require("express");
 const { ObjectId } = require("mongodb");
 const { getDB } = require("../config/db");
+const verifyToken = require("../middleware/verifyToken");
+const { verifyAdminOrModerator } = require("../middleware/verifyRoles");
 
 const router = express.Router();
 
 const scholarshipsCollection = () => getDB().collection("scholarships");
 
-router.post("/", async (req, res) => {
+router.post("/", verifyToken, verifyAdminOrModerator, async (req, res) => {
   try {
     const {
       scholarshipName,
@@ -68,6 +70,32 @@ router.post("/", async (req, res) => {
       message: "Scholarship created successfully",
       scholarshipId: result.insertedId,
       scholarship: newScholarship,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get("/all-scholarships", async (req, res) => {
+  try {
+    const { search, degree } = req.query;
+    const filter = {};
+
+    if (search) {
+      filter.$or = [
+        { scholarshipName: { $regex: search, $options: "i" } },
+        { universityName: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    if (degree) {
+      filter.degree = degree;
+    }
+
+    const scholarships = await scholarshipsCollection().find(filter).toArray();
+    res.json({
+      total: scholarships.length,
+      scholarships,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
