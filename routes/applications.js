@@ -4,10 +4,8 @@ const { getDB } = require("../config/db");
 
 const router = express.Router();
 
-// Get collection reference
 const applicationsCollection = () => getDB().collection("applications");
 
-// POST - Create a new application
 router.post("/", async (req, res) => {
   try {
     const {
@@ -26,7 +24,6 @@ router.post("/", async (req, res) => {
 
     // Validate required fields
     if (
-      !scholarshipId ||
       !userId ||
       !userName ||
       !userEmail ||
@@ -83,8 +80,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET - Get applications by filters (optional query parameters)
-router.get("/filter", async (req, res) => {
   try {
     const { userId, scholarshipId, status, paymentStatus } = req.query;
     const filter = {};
@@ -107,15 +102,12 @@ router.get("/filter", async (req, res) => {
 // GET - Get a specific application by ID
 router.get("/:id", async (req, res) => {
   try {
+router.get("/:id", async (req, res) => {
+  try {
     const { id } = req.params;
-
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid application ID format" });
-    }
-
-    const application = await applicationsCollection().findOne({
-      _id: new ObjectId(id),
-    });
+    }    });
     if (!application) {
       return res.status(404).json({ error: "Application not found" });
     }
@@ -132,16 +124,13 @@ router.put("/:id", async (req, res) => {
     const { id } = req.params;
     const updateFields = req.body;
 
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateFields = req.body;
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid application ID format" });
-    }
-
-    const updateData = {
-      ...updateFields,
-      updatedAt: new Date(),
-    };
-
-    const result = await applicationsCollection().findOneAndUpdate(
+    }    const result = await applicationsCollection().findOneAndUpdate(
       { _id: new ObjectId(id) },
       { $set: updateData },
       { returnDocument: "after" }
@@ -169,25 +158,20 @@ router.patch("/:id/status", async (req, res) => {
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid application ID format" });
     }
-
+router.patch("/:id/status", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { applicationStatus, feedback } = req.body;
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid application ID format" });
+    }
     if (!applicationStatus) {
       return res.status(400).json({ error: "applicationStatus is required" });
     }
-
     const updateData = {
       applicationStatus,
       updatedAt: new Date(),
-    };
-
-    if (feedback !== undefined) {
-      updateData.feedback = feedback;
-    }
-
-    const result = await applicationsCollection().findOneAndUpdate(
-      { _id: new ObjectId(id) },
-      { $set: updateData },
-      { returnDocument: "after" }
-    );
+    };    );
 
     if (!result.value) {
       return res.status(404).json({ error: "Application not found" });
@@ -215,20 +199,16 @@ router.patch("/:id/payment", async (req, res) => {
     if (!paymentStatus) {
       return res.status(400).json({ error: "paymentStatus is required" });
     }
-
-    const result = await applicationsCollection().findOneAndUpdate(
-      { _id: new ObjectId(id) },
-      { $set: { paymentStatus, updatedAt: new Date() } },
-      { returnDocument: "after" }
-    );
-
-    if (!result.value) {
-      return res.status(404).json({ error: "Application not found" });
+router.patch("/:id/payment", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { paymentStatus } = req.body;
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid application ID format" });
     }
-
-    res.json({
-      message: "Payment status updated successfully",
-      application: result.value,
+    if (!paymentStatus) {
+      return res.status(400).json({ error: "paymentStatus is required" });
+    }      application: result.value,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -252,13 +232,10 @@ router.delete("/:id", async (req, res) => {
       return res.status(404).json({ error: "Application not found" });
     }
 
-    res.json({
-      message: "Application deleted successfully",
-      deletedCount: result.deletedCount,
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid application ID format" });
+    }
 module.exports = router;

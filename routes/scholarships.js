@@ -4,10 +4,8 @@ const { getDB } = require("../config/db");
 
 const router = express.Router();
 
-// Get collection reference
 const scholarshipsCollection = () => getDB().collection("scholarships");
 
-// POST - Create a new scholarship
 router.post("/", async (req, res) => {
   try {
     const {
@@ -27,7 +25,6 @@ router.post("/", async (req, res) => {
       postedUserEmail,
     } = req.body;
 
-    // Validate required fields
     if (
       !scholarshipName ||
       !universityName ||
@@ -90,8 +87,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET - Get scholarships by filters (optional query parameters)
-router.get("/filter", async (req, res) => {
   try {
     const { country, category, degree, university } = req.query;
     const filter = {};
@@ -114,15 +109,12 @@ router.get("/filter", async (req, res) => {
 
 // GET - Get a specific scholarship by ID
 router.get("/:id", async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid scholarship ID format" });
-    }
-
-    const scholarship = await scholarshipsCollection().findOne({
-      _id: new ObjectId(id),
+    }      _id: new ObjectId(id),
     });
     if (!scholarship) {
       return res.status(404).json({ error: "Scholarship not found" });
@@ -139,16 +131,13 @@ router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const updateFields = req.body;
-
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateFields = req.body;
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid scholarship ID format" });
     }
-
-    const updateData = {
-      ...updateFields,
-      updatedAt: new Date(),
-    };
-
     const result = await scholarshipsCollection().findOneAndUpdate(
       { _id: new ObjectId(id) },
       { $set: updateData },
@@ -174,15 +163,12 @@ router.delete("/:id", async (req, res) => {
     const { id } = req.params;
 
     if (!ObjectId.isValid(id)) {
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid scholarship ID format" });
-    }
-
-    const result = await scholarshipsCollection().deleteOne({
-      _id: new ObjectId(id),
-    });
-
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ error: "Scholarship not found" });
+    }      return res.status(404).json({ error: "Scholarship not found" });
     }
 
     res.json({

@@ -4,10 +4,8 @@ const { getDB } = require("../config/db");
 
 const router = express.Router();
 
-// Get collection reference
 const reviewsCollection = () => getDB().collection("reviews");
 
-// POST - Create a new review
 router.post("/", async (req, res) => {
   try {
     const {
@@ -20,7 +18,6 @@ router.post("/", async (req, res) => {
       reviewComment,
     } = req.body;
 
-    // Validate required fields
     if (
       !scholarshipId ||
       !universityName ||
@@ -34,7 +31,6 @@ router.post("/", async (req, res) => {
       });
     }
 
-    // Validate rating point (should be between 1-5)
     if (ratingPoint < 1 || ratingPoint > 5) {
       return res.status(400).json({
         error: "Rating point must be between 1 and 5",
@@ -67,6 +63,7 @@ router.post("/", async (req, res) => {
 
 // GET - Get all reviews
 router.get("/", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const reviews = await reviewsCollection().find({}).toArray();
     res.json({
@@ -78,9 +75,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET - Get reviews by filters (optional query parameters)
-router.get("/filter", async (req, res) => {
-  try {
     const { scholarshipId, universityName, minRating, userEmail } = req.query;
     const filter = {};
 
@@ -136,11 +130,9 @@ router.get("/:id", async (req, res) => {
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid review ID format" });
     }
-
-    const review = await reviewsCollection().findOne({
-      _id: new ObjectId(id),
-    });
-    if (!review) {
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid review ID format" });
+    }    if (!review) {
       return res.status(404).json({ error: "Review not found" });
     }
 
@@ -156,23 +148,18 @@ router.put("/:id", async (req, res) => {
     const { id } = req.params;
     const { ratingPoint, reviewComment, userImage } = req.body;
 
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { ratingPoint, reviewComment, userImage } = req.body;
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid review ID format" });
     }
-
-    // Validate rating point if provided
     if (ratingPoint && (ratingPoint < 1 || ratingPoint > 5)) {
       return res.status(400).json({
         error: "Rating point must be between 1 and 5",
       });
     }
-
-    const updateData = {};
-    if (ratingPoint) updateData.ratingPoint = ratingPoint;
-    if (reviewComment) updateData.reviewComment = reviewComment;
-    if (userImage !== undefined) updateData.userImage = userImage;
-    updateData.updatedAt = new Date();
-
     const result = await reviewsCollection().findOneAndUpdate(
       { _id: new ObjectId(id) },
       { $set: updateData },
@@ -201,15 +188,12 @@ router.delete("/:id", async (req, res) => {
       return res.status(400).json({ error: "Invalid review ID format" });
     }
 
-    const result = await reviewsCollection().deleteOne({
-      _id: new ObjectId(id),
-    });
-
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ error: "Review not found" });
-    }
-
-    res.json({
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid review ID format" });
+    }    res.json({
       message: "Review deleted successfully",
       deletedCount: result.deletedCount,
     });
