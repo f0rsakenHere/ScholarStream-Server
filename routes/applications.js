@@ -89,7 +89,7 @@ router.get("/", verifyToken, verifyModerator, async (req, res) => {
   }
 });
 
-router.get("/filter", async (req, res) => {
+router.get("/filter", verifyToken, async (req, res) => {
   try {
     const { userId, scholarshipId, status, paymentStatus } = req.query;
     const filter = {};
@@ -128,7 +128,7 @@ router.get("/user/:email", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     if (!ObjectId.isValid(id)) {
@@ -149,14 +149,24 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const updateFields = req.body;
+    const userEmail = req.decoded.email;
 
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid application ID format" });
     }
+
+    delete updateFields.applicationStatus;
+    delete updateFields.paymentStatus;
+
+    const filter = {
+      _id: new ObjectId(id),
+      applicantEmail: userEmail,
+      applicationStatus: "pending",
+    };
 
     const updateData = {
       ...updateFields,
@@ -164,13 +174,15 @@ router.put("/:id", async (req, res) => {
     };
 
     const result = await applicationsCollection().findOneAndUpdate(
-      { _id: new ObjectId(id) },
+      filter,
       { $set: updateData },
       { returnDocument: "after" }
     );
 
     if (!result.value) {
-      return res.status(404).json({ error: "Application not found" });
+      return res.status(403).json({
+        error: "You can only edit your own pending applications.",
+      });
     }
 
     res.json({
@@ -260,20 +272,27 @@ router.patch("/:id/payment", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
+    const userEmail = req.decoded.email;
 
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid application ID format" });
     }
 
-    const result = await applicationsCollection().deleteOne({
+    const query = {
       _id: new ObjectId(id),
-    });
+      applicantEmail: userEmail,
+      applicationStatus: "pending",
+    };
+
+    const result = await applicationsCollection().deleteOne(query);
 
     if (result.deletedCount === 0) {
-      return res.status(404).json({ error: "Application not found" });
+      return res.status(403).json({
+        error: "You can only delete your own pending applications.",
+      });
     }
 
     res.json({
