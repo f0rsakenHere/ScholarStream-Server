@@ -1,9 +1,10 @@
 # ScholarStream Server API Documentation
 
 ## Overview
+
 Backend API for ScholarStream - A scholarship management platform with role-based access control (Admin, Moderator, Student).
 
-**Base URL:** `http://localhost:5000/api`
+**Base URL:** `https://scholar-stream-server-omega.vercel.app/api`
 
 **Tech Stack:** Node.js, Express.js, MongoDB, JWT Authentication
 
@@ -12,9 +13,11 @@ Backend API for ScholarStream - A scholarship management platform with role-base
 ## Authentication
 
 ### Generate JWT Token
+
 **Endpoint:** `POST /auth/jwt`
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com"
@@ -22,6 +25,7 @@ Backend API for ScholarStream - A scholarship management platform with role-base
 ```
 
 **Response:**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -29,6 +33,7 @@ Backend API for ScholarStream - A scholarship management platform with role-base
 ```
 
 **Token Usage:** Include in headers for protected routes:
+
 ```
 Authorization: Bearer <your_jwt_token>
 ```
@@ -38,9 +43,11 @@ Authorization: Bearer <your_jwt_token>
 ## User Management
 
 ### Create User
+
 **Endpoint:** `POST /users`
 
 **Request Body:**
+
 ```json
 {
   "name": "John Doe",
@@ -53,15 +60,19 @@ Authorization: Bearer <your_jwt_token>
 **Roles:** `admin`, `moderator`, `student`
 
 ### Get All Users
+
 **Endpoint:** `GET /users`
 
 ### Get User by ID
+
 **Endpoint:** `GET /users/:id`
 
 ### Update User
+
 **Endpoint:** `PUT /users/:id`
 
 ### Delete User
+
 **Endpoint:** `DELETE /users/:id`
 
 ---
@@ -69,11 +80,13 @@ Authorization: Bearer <your_jwt_token>
 ## Scholarships
 
 ### Create Scholarship (Admin/Moderator Only)
+
 **Endpoint:** `POST /scholarships`
 
 **Auth Required:** ✅ (Admin or Moderator)
 
 **Request Body:**
+
 ```json
 {
   "scholarshipName": "MIT Engineering Scholarship",
@@ -94,9 +107,11 @@ Authorization: Bearer <your_jwt_token>
 ```
 
 ### Get All Scholarships (with Search, Filter, Sort)
+
 **Endpoint:** `GET /scholarships/all-scholarships`
 
 **Query Parameters:**
+
 - `search` - Searches in scholarship name, university name, degree (case-insensitive)
 - `country` - Filter by university country
 - `category` - Filter by scholarship category
@@ -108,20 +123,25 @@ Authorization: Bearer <your_jwt_token>
   - `date_desc` - Newest first
 
 **Example:**
+
 ```
 GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 ```
 
 ### Get All Scholarships (Basic)
+
 **Endpoint:** `GET /scholarships`
 
 ### Get Scholarship by ID
+
 **Endpoint:** `GET /scholarships/:id`
 
 ### Update Scholarship
+
 **Endpoint:** `PUT /scholarships/:id`
 
 ### Delete Scholarship
+
 **Endpoint:** `DELETE /scholarships/:id`
 
 ---
@@ -129,11 +149,13 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 ## Applications
 
 ### Submit Application (Student)
+
 **Endpoint:** `POST /applications`
 
 **Auth Required:** ✅
 
 **Request Body:**
+
 ```json
 {
   "scholarshipId": "507f1f77bcf86cd799439011",
@@ -149,17 +171,20 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 ```
 
 **Auto-set fields:**
+
 - `applicationStatus: "pending"`
 - `paymentStatus: "paid"`
 
 **Validation:** Prevents duplicate applications (same scholarshipId + applicantEmail)
 
 ### Get All Applications (Moderator/Admin Only)
+
 **Endpoint:** `GET /applications`
 
 **Auth Required:** ✅ (Moderator or Admin)
 
 ### Get My Applications (Student)
+
 **Endpoint:** `GET /applications/user/:email`
 
 **Auth Required:** ✅ (Must match token email)
@@ -167,37 +192,44 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 **Security:** Users can only see their own applications
 
 ### Get Application by ID
+
 **Endpoint:** `GET /applications/:id`
 
 **Auth Required:** ✅
 
 ### Filter Applications
+
 **Endpoint:** `GET /applications/filter`
 
 **Auth Required:** ✅
 
 **Query Parameters:**
+
 - `userId` - Filter by user ID
 - `scholarshipId` - Filter by scholarship ID
 - `status` - Filter by application status
 - `paymentStatus` - Filter by payment status
 
 ### Update Application (Student - Own Pending Only)
+
 **Endpoint:** `PUT /applications/:id`
 
 **Auth Required:** ✅
 
 **Rules:**
+
 - Can only edit own applications
 - Can only edit if status is "pending"
 - Cannot change `applicationStatus` or `paymentStatus`
 
 ### Update Application Status (Moderator Only)
+
 **Endpoint:** `PATCH /applications/:id/status`
 
 **Auth Required:** ✅ (Moderator)
 
 **Request Body:**
+
 ```json
 {
   "applicationStatus": "processing",
@@ -208,11 +240,13 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 **Status Options:** `pending`, `processing`, `completed`, `rejected`
 
 ### Delete Application (Student - Own Pending Only)
+
 **Endpoint:** `DELETE /applications/:id`
 
 **Auth Required:** ✅
 
 **Rules:**
+
 - Can only delete own applications
 - Can only delete if status is "pending"
 
@@ -221,9 +255,11 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 ## Reviews
 
 ### Create Review
+
 **Endpoint:** `POST /reviews`
 
 **Request Body:**
+
 ```json
 {
   "scholarshipId": "507f1f77bcf86cd799439011",
@@ -239,12 +275,15 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 **Rating:** Must be between 1-5
 
 ### Get All Reviews
+
 **Endpoint:** `GET /reviews`
 
 ### Get Reviews by Scholarship
+
 **Endpoint:** `GET /reviews/scholarship/:scholarshipId`
 
 **Response includes average rating:**
+
 ```json
 {
   "total": 10,
@@ -254,21 +293,26 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 ```
 
 ### Filter Reviews
+
 **Endpoint:** `GET /reviews/filter`
 
 **Query Parameters:**
+
 - `scholarshipId` - Filter by scholarship
 - `universityName` - Search by university name
 - `minRating` - Minimum rating (1-5)
 - `userEmail` - Filter by user email
 
 ### Get Review by ID
+
 **Endpoint:** `GET /reviews/:id`
 
 ### Update Review
+
 **Endpoint:** `PUT /reviews/:id`
 
 ### Delete Review
+
 **Endpoint:** `DELETE /reviews/:id`
 
 ---
@@ -276,18 +320,21 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 ## Payments (Stripe Integration)
 
 ### Create Payment Intent
+
 **Endpoint:** `POST /payments/create-payment-intent`
 
 **Auth Required:** ✅
 
 **Request Body:**
+
 ```json
 {
-  "price": 100.00
+  "price": 100.0
 }
 ```
 
 **Response:**
+
 ```json
 {
   "clientSecret": "pi_1234_secret_5678"
@@ -301,11 +348,13 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 ## Admin Dashboard
 
 ### Get Admin Statistics
+
 **Endpoint:** `GET /admin/admin-stats`
 
 **Auth Required:** ✅ (Admin Only)
 
 **Response:**
+
 ```json
 {
   "totalUsers": 150,
@@ -325,21 +374,22 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 ## Role-Based Access Control
 
 ### Roles
+
 - **Admin:** Full access to all resources
 - **Moderator:** Can manage scholarships and application statuses
 - **Student:** Can view scholarships, apply, manage own applications
 
 ### Protected Routes Summary
 
-| Endpoint | Method | Access Level |
-|----------|--------|--------------|
-| POST /scholarships | Admin/Moderator |
-| GET /applications | Moderator/Admin |
-| PATCH /applications/:id/status | Moderator |
-| GET /admin/admin-stats | Admin |
-| GET /applications/user/:email | Own data only |
-| PUT /applications/:id | Own pending only |
-| DELETE /applications/:id | Own pending only |
+| Endpoint                       | Method           | Access Level |
+| ------------------------------ | ---------------- | ------------ |
+| POST /scholarships             | Admin/Moderator  |
+| GET /applications              | Moderator/Admin  |
+| PATCH /applications/:id/status | Moderator        |
+| GET /admin/admin-stats         | Admin            |
+| GET /applications/user/:email  | Own data only    |
+| PUT /applications/:id          | Own pending only |
+| DELETE /applications/:id       | Own pending only |
 
 ---
 
@@ -348,6 +398,7 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 ### Common Error Responses
 
 **400 Bad Request:**
+
 ```json
 {
   "error": "Missing required fields"
@@ -355,6 +406,7 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 ```
 
 **401 Unauthorized:**
+
 ```json
 {
   "error": "No token provided"
@@ -362,6 +414,7 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 ```
 
 **403 Forbidden:**
+
 ```json
 {
   "message": "Forbidden access"
@@ -369,6 +422,7 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 ```
 
 **404 Not Found:**
+
 ```json
 {
   "error": "Resource not found"
@@ -376,6 +430,7 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 ```
 
 **409 Conflict:**
+
 ```json
 {
   "error": "You have already applied for this scholarship"
@@ -383,6 +438,7 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 ```
 
 **500 Internal Server Error:**
+
 ```json
 {
   "error": "Error message details"
@@ -394,6 +450,7 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 ## Data Models
 
 ### User Schema
+
 ```javascript
 {
   name: String,
@@ -406,6 +463,7 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 ```
 
 ### Scholarship Schema
+
 ```javascript
 {
   scholarshipName: String,
@@ -429,6 +487,7 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 ```
 
 ### Application Schema
+
 ```javascript
 {
   scholarshipId: String,
@@ -450,6 +509,7 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 ```
 
 ### Review Schema
+
 ```javascript
 {
   scholarshipId: String,
@@ -481,44 +541,49 @@ STRIPE_SECRET_KEY=your_stripe_secret_key
 ## Frontend Development Tips
 
 ### 1. Authentication Flow
+
 ```javascript
 // Login and store token
-const response = await fetch('/api/auth/jwt', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email: userEmail })
+const response = await fetch("/api/auth/jwt", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ email: userEmail }),
 });
 const { token } = await response.json();
-localStorage.setItem('token', token);
+localStorage.setItem("token", token);
 
 // Use token in subsequent requests
 const headers = {
-  'Authorization': `Bearer ${localStorage.getItem('token')}`,
-  'Content-Type': 'application/json'
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
+  "Content-Type": "application/json",
 };
 ```
 
 ### 2. Decode JWT to Get User Role
+
 ```javascript
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from "jwt-decode";
 const decoded = jwtDecode(token);
 const userEmail = decoded.email;
 ```
 
 ### 3. Scholarship Search/Filter/Sort
+
 ```javascript
 const params = new URLSearchParams({
-  search: 'engineering',
-  country: 'USA',
-  sort: 'fees_asc'
+  search: "engineering",
+  country: "USA",
+  sort: "fees_asc",
 });
 const response = await fetch(`/api/scholarships/all-scholarships?${params}`);
 ```
 
 ### 4. Protected Routes (React Router)
+
 Check user role before rendering admin/moderator pages
 
 ### 5. Payment Integration
+
 Use Stripe Elements with the clientSecret from `/payments/create-payment-intent`
 
 ---
@@ -526,11 +591,13 @@ Use Stripe Elements with the clientSecret from `/payments/create-payment-intent`
 ## Testing the API
 
 ### Health Check
+
 ```bash
 GET http://localhost:5000/health
 ```
 
 ### Test Authentication
+
 ```bash
 # Generate token
 POST http://localhost:5000/api/auth/jwt
@@ -544,6 +611,7 @@ Headers: Authorization: Bearer <your_token>
 ---
 
 ## Support & Contact
+
 For backend issues or questions, refer to the error messages in the response or check server logs.
 
 **Server Status Endpoint:** `GET /health`
