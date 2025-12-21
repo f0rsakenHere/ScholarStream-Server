@@ -8,6 +8,28 @@ Backend API for ScholarStream - A scholarship management platform with role-base
 
 **Tech Stack:** Node.js, Express.js, MongoDB, JWT Authentication
 
+## Key Features ✅
+
+- **Role-based access control** (Admin, Moderator, Student) with route protections
+- **JWT authentication** for secure, stateless sessions
+- **Scholarship CRUD** (create, read, update, delete) with search, filter and sort
+- **Application workflows** with status tracking, validation and duplicate prevention
+- **Stripe payments** integration to create payment intents and verify payments
+- **Reviews & Ratings** with average rating calculation and filtering
+- **Admin dashboard endpoints** for aggregated statistics and charts
+- **Robust validation & error handling** with clear status codes
+- **CORS support** configured for localhost and production client domain
+
+## NPM Packages Used 📦
+
+- `express` — Web framework used to build the REST API
+- `mongodb` — Official MongoDB driver for persistence
+- `cors` — Cross-origin resource sharing middleware
+- `dotenv` — Loads environment variables from `.env`
+- `jsonwebtoken` — JWT creation and verification for auth
+- `stripe` — Stripe SDK used for payment intents
+- `nodemon` (dev) — Development utility for automatic server restarts
+
 ---
 
 ## Authentication
