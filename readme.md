@@ -403,15 +403,15 @@ GET /scholarships/all-scholarships?search=engineering&country=USA&sort=fees_asc
 
 ### Protected Routes Summary
 
-| Endpoint                       | Method           | Access Level |
-| ------------------------------ | ---------------- | ------------ |
-| POST /scholarships             | Admin/Moderator  |
-| GET /applications              | Moderator/Admin  |
-| PATCH /applications/:id/status | Moderator        |
-| GET /admin/admin-stats         | Admin            |
-| GET /applications/user/:email  | Own data only    |
-| PUT /applications/:id          | Own pending only |
-| DELETE /applications/:id       | Own pending only |
+| Endpoint                       | Method | Access Level     |
+| ------------------------------ | ------ | ---------------- |
+| POST /scholarships             | POST   | Admin/Moderator  |
+| GET /applications              | GET    | Moderator/Admin  |
+| PATCH /applications/:id/status | PATCH  | Moderator        |
+| GET /admin/admin-stats         | GET    | Admin            |
+| GET /applications/user/:email  | GET    | Own data only    |
+| PUT /applications/:id          | PUT    | Own pending only |
+| DELETE /applications/:id       | DELETE | Own pending only |
 
 ---
 
